@@ -167,4 +167,7 @@ app.post("/combat/:id/end", (req, res) => {
   res.redirect("/");
 });
 
-app.listen(PORT, () => console.log(`Node Bets lancé sur http://localhost:${PORT}`));
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => console.log(`Node Bets lancé sur le port ${PORT}`));
+
