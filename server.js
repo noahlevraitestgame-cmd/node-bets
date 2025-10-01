@@ -1,13 +1,13 @@
 const express = require("express");
 const session = require("express-session");
 const bodyParser = require("body-parser");
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs"); // ✅ Remplacement bcrypt -> bcryptjs
 const fs = require("fs");
 const path = require("path");
 
 const app = express();
 
-// ✅ Port dynamique pour Render
+// Port dynamique pour Render
 const PORT = process.env.PORT || 3000;
 
 // Charger ou initialiser les données
@@ -132,7 +132,7 @@ app.post("/bet/:id", (req, res) => {
   res.redirect("/");
 });
 
-// Terminer un combat (choisir le vainqueur)
+// Terminer un combat
 app.post("/combat/:id/end", (req, res) => {
   if (!req.session.user) return res.redirect("/login");
 
