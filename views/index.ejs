@@ -1,0 +1,58 @@
+<%- include('partials/header') %>
+
+<h2>Liste des combats</h2>
+<ul>
+  <% if (combats.length === 0) { %>
+    <li>Aucun combat pour l’instant</li>
+  <% } else { %>
+    <% combats.forEach(c => { %>
+      <li>
+        <strong><%= c.player1 %></strong> vs <strong><%= c.player2 %></strong> - Statut: <%= c.status %>
+        
+        <% if (user && c.status === 'open') { %>
+          <!-- Formulaire de pari -->
+          <form action="/bet/<%= c.id %>" method="POST">
+            <label>Parier sur :
+              <select name="player">
+                <% if (c.player1 !== user.username) { %>
+                  <option value="<%= c.player1 %>"><%= c.player1 %></option>
+                <% } %>
+                <% if (c.player2 !== user.username) { %>
+                  <option value="<%= c.player2 %>"><%= c.player2 %></option>
+                <% } %>
+              </select>
+            </label>
+            <label>Montant: <input type="number" name="amount" min="1" required></label>
+            <button type="submit">Parier</button>
+          </form>
+
+          <!-- Formulaire pour finir le combat -->
+          <form action="/combat/<%= c.id %>/end" method="POST">
+            <label>Vainqueur :
+              <select name="winner">
+                <option value="<%= c.player1 %>"><%= c.player1 %></option>
+                <option value="<%= c.player2 %>"><%= c.player2 %></option>
+              </select>
+            </label>
+            <button type="submit">Terminer le combat</button>
+          </form>
+        <% } %>
+
+        <% if (c.status === 'closed') { %>
+          <p>Vainqueur: <strong><%= c.winner %></strong></p>
+        <% } %>
+
+      </li>
+    <% }) %>
+  <% } %>
+</ul>
+
+<% if (user) { %>
+  <h3>Créer un combat</h3>
+  <form action="/combat/new" method="POST">
+    <label>Adversaire: <input type="text" name="opponent" required></label>
+    <button type="submit">Créer</button>
+  </form>
+<% } %>
+
+<%- include('partials/footer') %>

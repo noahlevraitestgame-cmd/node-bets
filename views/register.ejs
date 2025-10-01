@@ -1,0 +1,10 @@
+<%- include('partials/header') %>
+
+<h2>Inscription</h2>
+<form action="/register" method="POST">
+  <label>Pseudo: <input type="text" name="username" required></label><br>
+  <label>Mot de passe: <input type="password" name="password" required></label><br>
+  <button type="submit">S'inscrire</button>
+</form>
+
+<%- include('partials/footer') %>

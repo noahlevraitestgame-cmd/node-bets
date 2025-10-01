@@ -1,0 +1,62 @@
+{
+  "users": [
+    {
+      "username": "Noah_owner41",
+      "password": "$2b$10$DNb2H8d7yQ.GYVvDBdR6u.dYy3K7YzwqOwmi5c5nnBO3IkR2O/mJ2",
+      "coins": 0
+    },
+    {
+      "username": "Noah_owner410",
+      "password": "$2b$10$/IXlCm8SRUn8L0AnxlYQaudFC09Pp1d0cd9vJwflmYXIk.izqyozy",
+      "coins": 0
+    },
+    {
+      "username": "Noah_owner415",
+      "password": "$2b$10$FtrXMTejRQqpqJ/w0.qnoO6FMB0Adt0XDPqTnMcBxcn01Kq6os3WS",
+      "coins": 2000
+    }
+  ],
+  "combats": [
+    {
+      "id": 1759323433624,
+      "player1": "Noah_owner41",
+      "player2": "Theo",
+      "status": "closed",
+      "bets": []
+    },
+    {
+      "id": 1759324143462,
+      "player1": "Noah_owner410",
+      "player2": "Theo",
+      "status": "closed",
+      "bets": [
+        {
+          "combatId": 1759324143462,
+          "bettor": "Noah_owner415",
+          "player": "Noah_owner410",
+          "amount": 1000
+        }
+      ]
+    }
+  ],
+  "bets": [
+    {
+      "combatId": 1759323433624,
+      "bettor": "Noah_owner41",
+      "player": "Noah_owner41",
+      "amount": 1000
+    },
+    {
+      "combatId": 1759323433624,
+      "bettor": "Noah_owner410",
+      "player": "Noah_owner41",
+      "amount": 1000
+    },
+    {
+      "combatId": 1759324143462,
+      "bettor": "Noah_owner415",
+      "player": "Noah_owner410",
+      "amount": 1000
+    }
+  ]
+}
