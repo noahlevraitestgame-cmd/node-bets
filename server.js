@@ -6,7 +6,9 @@ const fs = require("fs");
 const path = require("path");
 
 const app = express();
-const PORT = 3000;
+
+// ✅ Port dynamique pour Render
+const PORT = process.env.PORT || 3000;
 
 // Charger ou initialiser les données
 let data = { users: [], combats: [], bets: [] };
@@ -18,7 +20,6 @@ function saveData() {
   fs.writeFileSync("data.json", JSON.stringify(data, null, 2));
 }
 
-// Config EJS et fichiers statiques
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 app.use(express.static("public"));
@@ -32,18 +33,6 @@ app.use(session({
 // Middleware pour passer l'utilisateur connecté aux vues
 app.use((req, res, next) => {
   res.locals.user = req.session.user;
-  next();
-});
-
-// Synchroniser la session avec la "source de vérité" des utilisateurs
-app.use((req, res, next) => {
-  if (req.session && req.session.user) {
-    const fresh = data.users.find(u => u.username === req.session.user.username);
-    if (fresh) {
-      req.session.user = fresh;
-      res.locals.user = fresh;
-    }
-  }
   next();
 });
 
@@ -84,10 +73,10 @@ app.post("/login", async (req, res) => {
   res.redirect("/");
 });
 
-// Déconnexion (optionnel : si tu veux empêcher la déconnexion, tu peux commenter cette route)
-// app.get("/logout", (req, res) => {
-//   req.session.destroy(() => res.redirect("/") );
-// });
+// Déconnexion
+app.get("/logout", (req, res) => {
+  req.session.destroy(() => res.redirect("/"));
+});
 
 // Créer un combat
 app.get("/combat/new", (req, res) => {
@@ -103,7 +92,7 @@ app.post("/combat/new", (req, res) => {
     player1: req.session.user.username,
     player2: opponent,
     status: "open",
-    bets: [] // toujours initialisé pour éviter les erreurs
+    bets: []
   };
   data.combats.push(combat);
   saveData();
@@ -119,9 +108,9 @@ app.post("/bet/:id", (req, res) => {
   if (!combat || combat.status !== "open") return res.send("Combat indisponible.");
 
   const user = data.users.find(u => u.username === req.session.user.username);
-  if (!user) return res.send("Utilisateur introuvable.");
+  const amt = parseInt(amount);
 
-  const amt = parseInt(amount, 10);
+  // Vérifications
   if (isNaN(amt) || amt <= 0) return res.send("Montant invalide.");
   if (amt > user.coins) return res.send("Solde insuffisant !");
   if (player === user.username) return res.send("Vous ne pouvez pas parier sur vous-même !");
@@ -143,23 +132,23 @@ app.post("/bet/:id", (req, res) => {
   res.redirect("/");
 });
 
-// Terminer un combat (choisir le gagnant)
+// Terminer un combat (choisir le vainqueur)
 app.post("/combat/:id/end", (req, res) => {
   if (!req.session.user) return res.redirect("/login");
 
   const combat = data.combats.find(c => c.id == req.params.id);
-  if (!combat || combat.status !== "open") return res.send("Combat introuvable ou déjà terminé.");
+  if (!combat || combat.status !== "open") return res.send("Combat indisponible.");
 
   const { winner } = req.body;
-  if (![combat.player1, combat.player2].includes(winner)) return res.send("Joueur invalide.");
+  if (![combat.player1, combat.player2].includes(winner)) return res.send("Vainqueur invalide.");
 
   combat.status = "closed";
 
-  // Payer les paris
+  // Créditer les paris gagnants
   combat.bets.forEach(bet => {
     if (bet.player === winner) {
       const bettor = data.users.find(u => u.username === bet.bettor);
-      if (bettor) bettor.coins += bet.amount * 2; // double gain
+      bettor.coins += bet.amount * 2; // Gagne le double
     }
   });
 
@@ -167,7 +156,5 @@ app.post("/combat/:id/end", (req, res) => {
   res.redirect("/");
 });
 
-const PORT = process.env.PORT || 3000;
-
+// Lancer le serveur
 app.listen(PORT, () => console.log(`Node Bets lancé sur le port ${PORT}`));
-
