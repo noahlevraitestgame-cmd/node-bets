@@ -1,8 +1,7 @@
 const express = require("express");
 const session = require("express-session");
-const SQLiteStore = require("connect-sqlite3")(session);
 const bodyParser = require("body-parser");
-const bcrypt = require("bcryptjs");
+const bcrypt = require("bcryptjs"); // ✅ bcrypt remplacé par bcryptjs
 const fs = require("fs");
 const path = require("path");
 
@@ -21,22 +20,18 @@ function saveData() {
   fs.writeFileSync("data.json", JSON.stringify(data, null, 2));
 }
 
-// Configurer EJS
+// Configurer Express
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 app.use(express.static("public"));
 app.use(bodyParser.urlencoded({ extended: true }));
-
-// Session persistante avec SQLite
 app.use(session({
-  store: new SQLiteStore({ db: "sessions.sqlite", dir: "./data" }),
   secret: "nodebets_secret",
   resave: false,
-  saveUninitialized: false,
-  cookie: { maxAge: 24 * 60 * 60 * 1000 } // 1 jour
+  saveUninitialized: false
 }));
 
-// Middleware pour passer l'utilisateur connecté aux vues
+// Middleware pour passer l'utilisateur aux vues
 app.use((req, res, next) => {
   res.locals.user = req.session.user;
   next();
@@ -116,12 +111,15 @@ app.post("/bet/:id", (req, res) => {
   const user = data.users.find(u => u.username === req.session.user.username);
   const amt = parseInt(amount);
 
+  // Vérifications
   if (isNaN(amt) || amt <= 0) return res.send("Montant invalide.");
   if (amt > user.coins) return res.send("Solde insuffisant !");
   if (player === user.username) return res.send("Vous ne pouvez pas parier sur vous-même !");
 
+  // Déduire le solde
   user.coins -= amt;
 
+  // Ajouter le pari
   const bet = {
     combatId: combat.id,
     bettor: user.username,
@@ -147,10 +145,11 @@ app.post("/combat/:id/end", (req, res) => {
 
   combat.status = "closed";
 
+  // Créditer les paris gagnants
   combat.bets.forEach(bet => {
     if (bet.player === winner) {
       const bettor = data.users.find(u => u.username === bet.bettor);
-      bettor.coins += bet.amount * 2;
+      bettor.coins += bet.amount * 2; // Gagne le double
     }
   });
 
