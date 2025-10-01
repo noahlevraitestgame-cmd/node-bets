@@ -1,0 +1,75 @@
+<%- include('partials/header') %>
+
+<h2>Combat : <%= combat.player1 %> vs <%= combat.player2 %></h2>
+<p>Statut : <%= combat.status %></p>
+
+<% if (combat.proof) { %>
+  <h3>Preuve soumise</h3>
+  <img src="<%= combat.proof %>" style="max-width:400px"/>
+<% } %>
+
+<h3>Bets récents</h3>
+<ul>
+<% bets.forEach(b => { %>
+  <li><%= b.bettor %> — <%= b.player %> — <%= b.amount %> pts</li>
+<% }) %>
+</ul>
+
+<% if (user && combat.status === 'open') { %>
+  <% if (user.username !== combat.player1 && user.username !== combat.player2) { %>
+    <h3>Placer un pari</h3>
+    <form method="POST" action="/bet/<%= combat.id %>">
+      <label>Choix :</label>
+      <select name="player">
+        <option value="<%= combat.player1 %>"><%= combat.player1 %></option>
+        <option value="<%= combat.player2 %>"><%= combat.player2 %></option>
+      </select>
+      <label>Montant :</label>
+      <input name="amount" type="number" min="1" required>
+      <button>Parier</button>
+    </form>
+  <% } %>
+
+  <% if (user.username === combat.player1 || user.username === combat.player2) { %>
+    <h3>Soumettre preuve (si tu es le vainqueur)</h3>
+    <p>Colle ton screenshot (Ctrl+V) dans la zone ci-dessous puis clique sur Envoyer.</p>
+    <div contenteditable="true" id="pasteBox" style="border:1px solid #ccc;padding:10px;min-height:80px"></div>
+    <button id="sendProof">Envoyer preuve</button>
+  <% } %>
+<% } %>
+
+<script>
+const pasteBox = document.getElementById('pasteBox');
+if (pasteBox) {
+  pasteBox.addEventListener('paste', e => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    for (const item of items) {
+      if (item.type.includes('image')) {
+        const file = item.getAsFile();
+        const reader = new FileReader();
+        reader.onload = evt => pasteBox.innerHTML = `<img src="${evt.target.result}" style="max-width:300px"/>`;
+        reader.readAsDataURL(file);
+      }
+    }
+  });
+
+  document.getElementById('sendProof').addEventListener('click', async () => {
+    const img = pasteBox.querySelector('img');
+    if (!img) return alert('Colle une image avant');
+    const data = img.src;
+    const combatId = "<%= combat.id %>";
+    await fetch('/combat/' + combatId + '/proof', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ imageBase64: data })
+    });
+    alert('Preuve envoyée. Le combat est maintenant en pending.');
+    location.reload();
+  });
+}
+</script>
+
+<a href="/">← Retour à l’accueil</a>
+
+<%- include('partials/footer') %>

@@ -1,0 +1,13 @@
+<%- include('partials/header') %>
+
+<h2>Créer un nouveau combat</h2>
+
+<form method="POST" action="/combat/new">
+  <label>Adversaire :</label>
+  <input type="text" name="opponent" required placeholder="Nom de l’adversaire">
+  <button type="submit">Créer Combat</button>
+</form>
+
+<a href="/">← Retour à l’accueil</a>
+
+<%- include('partials/footer') %>

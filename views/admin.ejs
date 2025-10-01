@@ -1,0 +1,32 @@
+<%- include('partials/header') %>
+
+<h1>Panel Admin</h1>
+<h2>Combats Pending</h2>
+
+<% if (pending.length === 0) { %>
+  <p>Aucun combat en attente.</p>
+<% } else { %>
+  <ul>
+  <% pending.forEach(c => { %>
+    <li>
+      <strong><%= c.player1 %> vs <%= c.player2 %></strong><br>
+      <% if (c.proof) { %>
+        <img src="<%= c.proof %>" style="max-width:300px"/><br>
+      <% } %>
+      <form method="POST" action="/admin/resolve" style="display:inline">
+        <input type="hidden" name="combatId" value="<%= c.id %>">
+        <input type="text" name="winner" placeholder="Nom du vainqueur" required>
+        <button>Accepter</button>
+      </form>
+      <form method="POST" action="/admin/cancel" style="display:inline">
+        <input type="hidden" name="combatId" value="<%= c.id %>">
+        <button>Annuler</button>
+      </form>
+    </li>
+  <% }) %>
+  </ul>
+<% } %>
+
+<a href="/">← Retour à l’accueil</a>
+
+<%- include('partials/footer') %>
